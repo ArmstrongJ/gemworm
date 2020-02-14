@@ -24,8 +24,22 @@
 #define CELLW	40
 #define CELLH	24
 
+#ifdef __GNUC__
+#include <stdint.h>
+
+#ifndef WORD
+#define WORD uint16_t
+#endif
+
+#include <gem.h>
+
+#else
+
 #include <portab.h>
 #include <aes.h>
+
+#endif
+
 #include "player.h"
 
 /* Initializes the play field */

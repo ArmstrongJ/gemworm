@@ -20,12 +20,27 @@
 
 #include <stdio.h>
 
+#ifdef __GNUC__
+
+#include <gem.h>
+
+#else
+
 #include <portab.h>
 #include <aes.h>
 #include <vdi.h>
 
+#endif
+
 #include "field.h"
 #include "player.h"
+
+#ifdef __GEMLIB__
+#define RED     G_RED
+#define GREEN   G_GREEN
+#define WHITE   G_WHITE
+#define BLACK   G_BLACK
+#endif
 
 /* Defines the play field */
 char field[CELLW][CELLH];
