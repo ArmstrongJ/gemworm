@@ -128,8 +128,6 @@ GRECT box,origin;
     form_do(about_box,0);
     form_dial(FMD_FINISH,0,0,0,0,box.g_x, box.g_y, box.g_w, box.g_h);
 
-
-
     return;
 }
 
@@ -206,6 +204,9 @@ WORD txtwidth,txtheight;
     wind_update(END_UPDATE);
 
     rsrc_gaddr(R_TREE,ABOUT,&about_box);
+
+    /* Make the application name nicer */
+    menu_register(app_accid, "Worm!");
 
     return open_window(1);
 }
