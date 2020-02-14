@@ -21,27 +21,27 @@
 #define __PLHEADERS
 
 typedef struct {
-	char c_x;
-	char c_y;
-	void *next;
+    char c_x;
+    char c_y;
+    void *next;
 } WUNIT;
 
 typedef struct {
-	int length;
-	WUNIT *head;
-	char dir;
-	int grow;
+    int length;
+    WUNIT *head;
+    char dir;
+    int grow;
 } WPLAYER;
 
-#define WUP		0
-#define WDOWN	1
-#define WLEFT	2
-#define WRIGHT	3
+#define WUP     0
+#define WDOWN   1
+#define WLEFT   2
+#define WRIGHT  3
 
-#define ALIVE	1
-#define DEAD	0
+#define ALIVE   1
+#define DEAD    0
 
-#define STARTLENGTH	6
+#define STARTLENGTH 6
 
 void move_player(WPLAYER *player, char dir);
 

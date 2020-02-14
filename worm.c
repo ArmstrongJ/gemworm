@@ -359,9 +359,10 @@ EVMULT_OUT evout;
             /* Key presses */
             if((ret & MU_KEYBD) && playing > 0) {
                 hndl_keys(key, player);
+            } 
 
             /* Timer - update game */
-            } else if((ret & MU_TIMER) && playing > 0) {
+            if((ret & MU_TIMER) && playing > 0) {
                 wind_update(BEG_UPDATE);
                 palive = update_player(player, &tailx, &taily);
                 falive = update_field(player);
@@ -380,9 +381,10 @@ EVMULT_OUT evout;
                     reset_player(player);
                     playing = 0;
                 }
+            } 
 
             /* Messages (menu, resizes, etc.) */
-            } else if(ret & MU_MESAG) {
+            if(ret & MU_MESAG) {
 #ifdef DEBUG
                 printf("MSG: %d\n",msg[0]);
 #endif
@@ -436,14 +438,15 @@ EVMULT_OUT evout;
                                 appl_write(app_accid,sizeof(msg),msg);
                                 break;
                             case MNEW:
-                               update_field(player);
-                               draw_field(app_vh, &app_wdw);
+                                update_field(player);
+                                draw_field(app_vh, &app_wdw);
                                 playing = 1;
                                 break;
                             case MABOUT:
                                 hndl_about();
                                 break;
                         }
+                        menu_tnormal(app_menu, msg[3], 1);
                         break;
 
                 } /* switch */
