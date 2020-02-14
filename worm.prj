@@ -1,0 +1,16 @@
+worm.prg
+;
+.C [-K -P]
+.S [] ; -Y]
+.L [-S=16384]
+=
+PCSTART.O
+;
+field.c (field.h, player.h)
+player.c (field.h, player.h)
+worm.c (field.h, player.h, wormst.h)
+;
+PCSTDLIB.LIB
+PCTOSLIB.LIB
+PCGEMLIB.LIB
+
