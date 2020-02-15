@@ -31,6 +31,7 @@ typedef struct {
     WUNIT *head;
     char dir;
     int grow;
+    int score;
 } WPLAYER;
 
 #define WUP     0

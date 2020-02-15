@@ -101,7 +101,7 @@ OBJECT FAR *about_box;
 #define STARTHEIGHT 480
 
 #ifndef MGEMLIB
-int rc_intersect(GRECT *one, GRECT *two)
+int rc_intersect(const GRECT *one, GRECT *two)
 {
 WORD tx,ty,tw,th;
 
@@ -154,9 +154,9 @@ int open_window(int new)
     if(new == 1) {
         /* Get the desktop */
         wind_get(0, WF_WXYWH, &app_wdw.g_x,
-                             &app_wdw.g_y,
-                             &app_wdw.g_w,
-                             &app_wdw.g_h);
+                              &app_wdw.g_y,
+                              &app_wdw.g_w,
+                              &app_wdw.g_h);
     
         app_wdw.g_w = min(STARTWIDTH,app_wdw.g_w);
         app_wdw.g_h = min(STARTHEIGHT,app_wdw.g_h);
@@ -211,11 +211,65 @@ WORD txtwidth,txtheight;
     return open_window(1);
 }
 
-/* Not necessary yet... */
-void do_redraw()
+int get_score_height()
 {
-GRECT box, me;
+WORD attrib[10];
+    
+    vqt_attributes(app_vh, attrib);
+    return attrib[9];
+}
 
+void do_redraw_score(WPLAYER *player, GRECT *update)
+{
+WORD pts[4];
+char score_str[128];
+
+    vsf_interior(app_vh, 1);
+
+    /* Fill background */
+    vsf_color(app_vh, (WORD)WHITE);
+    pts[0] = update->g_x; pts[1] = update->g_y;
+    pts[2] = update->g_x+update->g_w; pts[3] = update->g_y+update->g_h;
+    v_bar(app_vh, pts);
+
+    /* Text */
+    sprintf(score_str, "Score: %d", player->score);
+    vst_color(app_vh, (WORD)BLACK);
+    v_gtext(app_vh, update->g_x+5, update->g_y + update->g_h - 2, score_str);
+}
+
+void force_redraw_score(WPLAYER *player)
+{
+GRECT score;
+
+    graf_mouse(M_OFF,NULL);
+    wind_update(BEG_UPDATE);
+
+    wind_get(app_wh, WF_WXYWH, &score.g_x, &score.g_y, &score.g_w, &score.g_h);
+    score.g_h = get_score_height();
+
+    do_redraw_score(player, &score);
+    
+    wind_update(END_UPDATE);
+    graf_mouse(M_ON,NULL);
+}
+
+void window_to_field_rect(GRECT *rc)
+{
+int sh;
+
+    sh = get_score_height() + 1;
+    rc->g_y += sh;
+    rc->g_h -= sh;
+}
+    
+#define PRINTRC(n,r)  printf("%s -> x=%d y=%d w=%d h=%d\n", n, r.g_x, r.g_y, r.g_w, r.g_h)
+
+/* Not necessary yet... */
+void do_redraw(WPLAYER *player)
+{
+GRECT box, me, field, score, rc;
+int updated_score;
 WORD pts[4];
 
 #ifdef DEBUG
@@ -226,19 +280,56 @@ WORD pts[4];
     wind_update(BEG_UPDATE);
 
     wind_get(app_wh, WF_WXYWH, &me.g_x, &me.g_y, &me.g_w, &me.g_h);
+    
+    memcpy(&field, &me, sizeof(GRECT));
+    memcpy(&score, &me, sizeof(GRECT));
+
+    score.g_h = get_score_height();
+    window_to_field_rect(&field);
+
     wind_get(app_wh, WF_FIRSTXYWH, &box.g_x,
                                    &box.g_y,
                                    &box.g_w,
                                    &box.g_h);
 
+    updated_score = 0;
     while(box.g_w || box.g_h) {
-        if(rc_intersect(&me, &box)) {
+
+#ifdef DEBUG
+        PRINTRC("box", box);
+        PRINTRC("field", field);
+#endif
+
+        memcpy(&rc, &field, sizeof(GRECT));
+        if(rc_intersect(&box, &rc)) {
+#ifdef DEBUG
+            printf("Field draw\n");
+#endif
             pts[0] = box.g_x;
             pts[1] = box.g_y;
             pts[2] = box.g_w+box.g_x-1;
             pts[3] = box.g_h+box.g_y-1;
             vs_clip(app_vh, 1, pts);
-            draw_field(app_vh, &app_wdw);
+            draw_field(app_vh, &field);
+        }
+
+#ifdef DEBUG        
+        PRINTRC("box", box);
+        PRINTRC("score", score);
+#endif
+
+        memcpy(&rc, &score, sizeof(GRECT));
+        if(rc_intersect(&box, &rc)) {
+#ifdef DEBUG
+            printf("Score draw\n");
+#endif
+            pts[0] = box.g_x;
+            pts[1] = box.g_y;
+            pts[2] = box.g_w+box.g_x-1;
+            pts[3] = box.g_h+box.g_y-1;
+            vs_clip(app_vh, 1, pts);
+            do_redraw_score(player, &score);
+            /* updated_score = 1; */
         }
         wind_get(app_wh, WF_NEXTXYWH, &box.g_x,
                                      &box.g_y,
@@ -296,6 +387,7 @@ WORD special_keys;
 WORD key;
 
 WPLAYER *player;
+GRECT field;
 
 int playing = 0;
 int palive, falive;
@@ -328,6 +420,10 @@ EVMULT_OUT evout;
         evin.emi_flags = MU_KEYBD | MU_MESAG | MU_TIMER;
         evin.emi_tlow = (int16_t)MOVEDELAY;
 #endif
+
+        /* Set up the "field" rectangle */
+        memcpy(&field, &app_wdw, sizeof(GRECT));
+        window_to_field_rect(&field);
 
         msg[0] = AC_OPEN;
         msg[4] = app_accid;
@@ -368,12 +464,22 @@ EVMULT_OUT evout;
                 palive = update_player(player, &tailx, &taily);
                 falive = update_field(player);
 
-                food_check(app_vh, &app_wdw, player);
+                switch(food_check(app_vh, &field, player)) {
+                    case FOODADDITION:
+                        player->score += 100;
+                        force_redraw_score(player);
+                        break;
+                    case FOODRESETCOUNT:
+                        player->score -= 10;
+                        if(player->score < 0) player->score = 0;
+                        force_redraw_score(player);
+                        break;
+                }
 
                 /* form_alert(1,"[1][Update][Ok]"); */
                 /* draw_field(app_vh, &app_wdw); */
-                incremental_draw(app_vh, &app_wdw, player->head->c_x, player->head->c_y);
-                incremental_draw(app_vh, &app_wdw, tailx, taily);
+                incremental_draw(app_vh, &field, player->head->c_x, player->head->c_y);
+                incremental_draw(app_vh, &field, tailx, taily);
 
                 wind_update(END_UPDATE);
 
@@ -426,9 +532,13 @@ EVMULT_OUT evout;
                     case WM_MOVED:
                     case WM_SIZED:
                         do_window_change((GRECT *)&msg[4]);
+                        memcpy(&field, &app_wdw, sizeof(GRECT));
+                        window_to_field_rect(&field);
+                        /* Fall through */
+                        
                     case WM_REDRAW:
                         update_field(player);
-                        do_redraw();
+                        do_redraw(player);
                         break;
 
                     case MN_SELECTED:
@@ -439,8 +549,10 @@ EVMULT_OUT evout;
                                 appl_write(app_accid,sizeof(msg),msg);
                                 break;
                             case MNEW:
+                                player->score = 0;
+                                force_redraw_score(player);
                                 update_field(player);
-                                draw_field(app_vh, &app_wdw);
+                                draw_field(app_vh, &field);
                                 playing = 1;
                                 break;
                             case MABOUT:

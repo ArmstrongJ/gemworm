@@ -57,6 +57,7 @@ int food_check(WORD h_vdi, GRECT *play, WPLAYER *player);
 
 void incremental_draw(WORD h_vdi, GRECT *play, int x, int y);
 
-#define FOODADDITION	5
+#define FOODADDITION    5
+#define FOODRESETCOUNT  30
 
 #endif /* __FIELD_HEADERS */

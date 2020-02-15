@@ -45,101 +45,100 @@
 /* Defines the play field */
 char field[CELLW][CELLH];
 
-#define CELLBLANK		0
-#define CELLPLAYER	1
-#define CELLWALL		2
-#define CELLFOOD		3
+#define CELLBLANK       0
+#define CELLPLAYER  1
+#define CELLWALL        2
+#define CELLFOOD        3
 
-#define max(x,y)	x>y ? x : y
-#define min(x,y)	x<y ? x : y
-
-#define FOODRESETCOUNT	30
+#define max(x,y)    x>y ? x : y
+#define min(x,y)    x<y ? x : y
 
 struct _food{
-	WORD c_x;
-	WORD c_y;
-	int count;
+    WORD c_x;
+    WORD c_y;
+    int count;
 } food;
 
 void empty_field(char celltype)
 {
 char i,j;
 
-	for(i=0;i<CELLW-1;i++) {
-		for(j=0;j<CELLH-1;j++) {
-			if(field[i][j] == celltype) 
-				field[i][j] = CELLBLANK;
-		}
-	}
-	
+    for(i=0;i<CELLW-1;i++) {
+        for(j=0;j<CELLH-1;j++) {
+            if(field[i][j] == celltype) 
+                field[i][j] = CELLBLANK;
+        }
+    }
+    
 }
 
 void food_reset()
 {
-	
-	field[food.c_x][food.c_y] = CELLBLANK;
-	food.c_x = rand() % CELLW;
-	food.c_y = rand() % CELLH;
-	while(field[food.c_x][food.c_y] != CELLBLANK) {
-		food.c_x = rand() % CELLW;
-		food.c_y = rand() % CELLH;
-	}
-	food.count = 0;
-	field[food.c_x][food.c_y] = CELLFOOD;
+    
+    field[food.c_x][food.c_y] = CELLBLANK;
+    food.c_x = rand() % CELLW;
+    food.c_y = rand() % CELLH;
+    while(field[food.c_x][food.c_y] != CELLBLANK) {
+        food.c_x = rand() % CELLW;
+        food.c_y = rand() % CELLH;
+    }
+    food.count = 0;
+    field[food.c_x][food.c_y] = CELLFOOD;
 }
 
 void food_init()
 {
-	food.c_x = 10;
-	food.c_y = 10;
-	food_reset();
-	field[food.c_x][food.c_y] = CELLFOOD;
+    food.c_x = 10;
+    food.c_y = 10;
+    food_reset();
+    field[food.c_x][food.c_y] = CELLFOOD;
 }
 
 int food_check(WORD h_vdi, GRECT *play, WPLAYER *player) 
 {
 int oldx,oldy;
 
-	if(player->head->c_x == food.c_x && player->head->c_y == food.c_y) {
-		player->grow += FOODADDITION;
+    if(player->head->c_x == food.c_x && player->head->c_y == food.c_y) {
+        player->grow += FOODADDITION;
         oldx = food.c_x; oldy = food.c_y;
-		food_reset();
+        food_reset();
         incremental_draw(h_vdi, play, food.c_x, food.c_y);
         field[oldx][oldy] = CELLPLAYER;
-		return FOODADDITION;
-	}
-	
-	food.count++;
-	if(food.count > FOODRESETCOUNT) {
+        return FOODADDITION;
+    }
+    
+    food.count++;
+    if(food.count > FOODRESETCOUNT) {
         oldx = food.c_x; oldy = food.c_y;
-		food_reset();
+        food_reset();
         incremental_draw(h_vdi, play, food.c_x, food.c_y);
         incremental_draw(h_vdi, play, oldx, oldy);
+        return FOODRESETCOUNT;
     }
-	return 0;
+    return 0;
 }
 
 void field_init() 
 {
 char i,j;
 
-	for(j=0;j<CELLH;j++) {
-		field[0][j] = CELLWALL;
-		field[CELLW-1][j] = CELLWALL;
-	}
+    for(j=0;j<CELLH;j++) {
+        field[0][j] = CELLWALL;
+        field[CELLW-1][j] = CELLWALL;
+    }
 
-	for(i=1;i<CELLW-1;i++) {
-		field[i][0] = CELLWALL;
-		field[i][CELLH-1] = CELLWALL; 
-		for(j=1;j<CELLH-2;j++)
-			field[i][j] = CELLBLANK;
-	}
+    for(i=1;i<CELLW-1;i++) {
+        field[i][0] = CELLWALL;
+        field[i][CELLH-1] = CELLWALL; 
+        for(j=1;j<CELLH-2;j++)
+            field[i][j] = CELLBLANK;
+    }
 
 }
 
 int check_wall(WPLAYER *player) 
 {
-	return field[player->head->c_x][player->head->c_y] == CELLWALL ? DEAD : ALIVE;	
+    return field[player->head->c_x][player->head->c_y] == CELLWALL ? DEAD : ALIVE;  
 }
 
 void drawcell(WORD h_vdi, int type, char cx, char cy, 
@@ -148,44 +147,44 @@ void drawcell(WORD h_vdi, int type, char cx, char cy,
 WORD pts[4];
 int vx,vy;
 
-	vx = xoffset + cx*cellwidth;
-	vy = yoffset + cy*cellheight;
+    vx = xoffset + cx*cellwidth;
+    vy = yoffset + cy*cellheight;
 
-	switch(type) {
-		case CELLWALL:
-			vsf_color(h_vdi, (WORD)RED);
-			pts[0] = vx; pts[1] = vy;
-			pts[2] = vx+cellwidth; pts[3] = vy+cellheight;
-			v_bar(h_vdi,pts);
-			break;
+    switch(type) {
+        case CELLWALL:
+            vsf_color(h_vdi, (WORD)RED);
+            pts[0] = vx; pts[1] = vy;
+            pts[2] = vx+cellwidth; pts[3] = vy+cellheight;
+            v_bar(h_vdi,pts);
+            break;
         case CELLBLANK:
-			vsf_color(h_vdi, (WORD)WHITE);
-			pts[0] = vx; pts[1] = vy;
-			pts[2] = vx+cellwidth; pts[3] = vy+cellheight;
-			v_bar(h_vdi,pts);
-			break;
-		case CELLPLAYER:
-			vsf_color(h_vdi,(WORD)BLACK);
-			v_ellipse(h_vdi,(WORD)(vx+cellwidth/2),
-			         (WORD)(vy+cellheight/2),
-				 (WORD)(max(cellwidth/2-1,1)),
-				 (WORD)(max(cellheight/2-1,1)));
-			break;
-		case CELLFOOD:
-			vsf_color(h_vdi,(WORD)GREEN);
-			v_ellipse(h_vdi,(WORD)(vx+cellwidth/2),
-			         (WORD)(vy+2*cellheight/3),
-				 (WORD)(cellwidth/2),
-				 (WORD)(cellheight/3));
-			vsf_color(h_vdi,(WORD)BLACK);
-			v_pieslice(h_vdi,(WORD)(vx+cellwidth/2),
-			         (WORD)(vy+cellheight/2),
-				 (WORD)(cellheight/2),
-				 (WORD)(500),
-				 (WORD)(1300));
-			break;
-	}
-	
+            vsf_color(h_vdi, (WORD)WHITE);
+            pts[0] = vx; pts[1] = vy;
+            pts[2] = vx+cellwidth; pts[3] = vy+cellheight;
+            v_bar(h_vdi,pts);
+            break;
+        case CELLPLAYER:
+            vsf_color(h_vdi,(WORD)BLACK);
+            v_ellipse(h_vdi,(WORD)(vx+cellwidth/2),
+                     (WORD)(vy+cellheight/2),
+                 (WORD)(max(cellwidth/2-1,1)),
+                 (WORD)(max(cellheight/2-1,1)));
+            break;
+        case CELLFOOD:
+            vsf_color(h_vdi,(WORD)GREEN);
+            v_ellipse(h_vdi,(WORD)(vx+cellwidth/2),
+                     (WORD)(vy+2*cellheight/3),
+                 (WORD)(cellwidth/2),
+                 (WORD)(cellheight/3));
+            vsf_color(h_vdi,(WORD)BLACK);
+            v_pieslice(h_vdi,(WORD)(vx+cellwidth/2),
+                     (WORD)(vy+cellheight/2),
+                 (WORD)(cellheight/2),
+                 (WORD)(500),
+                 (WORD)(1300));
+            break;
+    }
+    
 }
 
 void incremental_draw(WORD h_vdi, GRECT *play, int x, int y)
@@ -195,7 +194,7 @@ int cellwidth, cellheight;
 WUNIT *walker;
 
     cellwidth = max(1,play->g_w/CELLW);
-	cellheight = max(1,play->g_h/CELLH);
+    cellheight = max(1,play->g_h/CELLH);
 
     drawcell(h_vdi, field[x][y], 
              x, y, 
@@ -210,31 +209,31 @@ WORD pts[4];
 int cellwidth, cellheight;
 
 #ifdef VDEBUG
-	printf("%d: %d %d %d %d\n",h_vdi,play->g_x,play->g_y,play->g_w,play->g_h);
+    printf("%d: %d %d %d %d\n",h_vdi,play->g_x,play->g_y,play->g_w,play->g_h);
 #endif
 
     vsf_interior(h_vdi, 1);
 
-	/* Fill background */
-	vsf_color(h_vdi, (WORD)WHITE);
-	pts[0] = play->g_x; pts[1] = play->g_y;
-	pts[2] = play->g_x+play->g_w; pts[3] = play->g_y+play->g_h;
-	v_bar(h_vdi,pts);
+    /* Fill background */
+    vsf_color(h_vdi, (WORD)WHITE);
+    pts[0] = play->g_x; pts[1] = play->g_y;
+    pts[2] = play->g_x+play->g_w; pts[3] = play->g_y+play->g_h;
+    v_bar(h_vdi,pts);
 
-	cellwidth = max(1,play->g_w/CELLW);
-	cellheight = max(1,play->g_h/CELLH);
-	
-	/* Draw all cells */
-	for(i=0;i<CELLW;i++) {
-		for(j=0;j<CELLH;j++) {
+    cellwidth = max(1,play->g_w/CELLW);
+    cellheight = max(1,play->g_h/CELLH);
+    
+    /* Draw all cells */
+    for(i=0;i<CELLW;i++) {
+        for(j=0;j<CELLH;j++) {
             if(field[i][j] != CELLBLANK)
                 drawcell(h_vdi, field[i][j], i, j, 
                          play->g_x, play->g_y,
                          cellwidth, cellheight);
         }
-	}
+    }
 
-	/* Done! */
+    /* Done! */
 
 }
 
@@ -243,18 +242,18 @@ int update_field(WPLAYER *player)
 {
 WUNIT *walker;
 int da;
-	
-	/* Check the wall now */
-	da = check_wall(player);
-	
-	/* First empty the player from the field */
-	empty_field(CELLPLAYER);
-	
-	/* Now reinsert all player values */
-	walker = player->head;
-	while(walker != NULL) {
-		field[walker->c_x][walker->c_y] = CELLPLAYER;
-		walker = (WUNIT *)walker->next;
-	}
-	return da;
+    
+    /* Check the wall now */
+    da = check_wall(player);
+    
+    /* First empty the player from the field */
+    empty_field(CELLPLAYER);
+    
+    /* Now reinsert all player values */
+    walker = player->head;
+    while(walker != NULL) {
+        field[walker->c_x][walker->c_y] = CELLPLAYER;
+        walker = (WUNIT *)walker->next;
+    }
+    return da;
 }
