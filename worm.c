@@ -219,7 +219,7 @@ WORD attrib[10];
     return attrib[9];
 }
 
-void do_redraw_score(WPLAYER *player, GRECT *update)
+void do_redraw_score(WPLAYER *player, GRECT *update, int playing)
 {
 WORD pts[4];
 char score_str[128];
@@ -233,12 +233,22 @@ char score_str[128];
     v_bar(app_vh, pts);
 
     /* Text */
-    sprintf(score_str, "Score: %d", player->score);
     vst_color(app_vh, (WORD)BLACK);
+    vst_point(app_vh, (WORD)6, &pts[0], &pts[1], &pts[2], &pts[3]);
+    v_gtext(app_vh, update->g_x + update->g_w - 20*pts[2],
+                    update->g_y + update->g_h/2 - 1,
+                    "W,A,S,D to Move");
+    v_gtext(app_vh, update->g_x + update->g_w - 20*pts[2],
+                    update->g_y + update->g_h - 2,
+                    playing == 1 ? "P to Pause" : "P to Play");
+    
+    sprintf(score_str, "Score: %d", player->score);
+    vst_point(app_vh, (WORD)12, &pts[0], &pts[1], &pts[2], &pts[3]);
     v_gtext(app_vh, update->g_x+5, update->g_y + update->g_h - 2, score_str);
+    
 }
 
-void force_redraw_score(WPLAYER *player)
+void force_redraw_score(WPLAYER *player, int playing)
 {
 GRECT score;
 
@@ -248,7 +258,7 @@ GRECT score;
     wind_get(app_wh, WF_WXYWH, &score.g_x, &score.g_y, &score.g_w, &score.g_h);
     score.g_h = get_score_height();
 
-    do_redraw_score(player, &score);
+    do_redraw_score(player, &score, playing);
     
     wind_update(END_UPDATE);
     graf_mouse(M_ON,NULL);
@@ -266,7 +276,7 @@ int sh;
 #define PRINTRC(n,r)  printf("%s -> x=%d y=%d w=%d h=%d\n", n, r.g_x, r.g_y, r.g_w, r.g_h)
 
 /* Not necessary yet... */
-void do_redraw(WPLAYER *player)
+void do_redraw(WPLAYER *player, int playing)
 {
 GRECT box, me, field, score, rc;
 int updated_score;
@@ -328,7 +338,7 @@ WORD pts[4];
             pts[2] = box.g_w+box.g_x-1;
             pts[3] = box.g_h+box.g_y-1;
             vs_clip(app_vh, 1, pts);
-            do_redraw_score(player, &score);
+            do_redraw_score(player, &score, playing);
             /* updated_score = 1; */
         }
         wind_get(app_wh, WF_NEXTXYWH, &box.g_x,
@@ -349,29 +359,40 @@ void do_window_change(GRECT *rect)
     wind_get(app_wh, WF_WXYWH, &app_wdw.g_x, &app_wdw.g_y, &app_wdw.g_w, &app_wdw.g_h);
 }
 
-void hndl_keys(WORD key, WPLAYER *player)
+void hndl_keys(WORD key, WPLAYER *player, int *playing)
 {
 char asc;
 
     asc = key & 127;
-    switch(asc) {
-        case 'w':
-        case 'W':
-            player->dir = WUP;
-            break;
-        case 's':
-        case 'S':
-            player->dir = WDOWN;
-            break;
-        case 'a':
-        case 'A':
-            player->dir = WLEFT;
-            break;
-        case 'd':
-        case 'D':
-            player->dir = WRIGHT;
-            break;
-    }
+    
+    if(*playing == 1) {
+        switch(asc) {
+            case 'w':
+            case 'W':
+                player->dir = WUP;
+                break;
+            case 's':
+            case 'S':
+                player->dir = WDOWN;
+                break;
+            case 'a':
+            case 'A':
+                player->dir = WLEFT;
+                break;
+            case 'd':
+            case 'D':
+                player->dir = WRIGHT;
+                break;
+            case 'p':
+            case 'P':
+                *playing = 0;
+                break;
+        }
+    } else {
+        if(asc == 'p' || asc == 'P')
+            *playing = 1;
+    } 
+       
 
 }
 
@@ -390,6 +411,7 @@ WPLAYER *player;
 GRECT field;
 
 int playing = 0;
+int last_playing;
 int palive, falive;
 
 int tailx, taily;
@@ -454,8 +476,12 @@ EVMULT_OUT evout;
             printf("maybe MSG: %d\n",msg[0]);
 #endif
             /* Key presses */
-            if((ret & MU_KEYBD) && playing > 0) {
-                hndl_keys(key, player);
+            if((ret & MU_KEYBD)) {
+                last_playing = playing;
+                hndl_keys(key, player, &playing);
+                if(last_playing != playing) {
+                    force_redraw_score(player, playing);
+                }                
             } 
 
             /* Timer - update game */
@@ -467,12 +493,12 @@ EVMULT_OUT evout;
                 switch(food_check(app_vh, &field, player)) {
                     case FOODADDITION:
                         player->score += 100;
-                        force_redraw_score(player);
+                        force_redraw_score(player, playing);
                         break;
                     case FOODRESETCOUNT:
                         player->score -= 10;
                         if(player->score < 0) player->score = 0;
-                        force_redraw_score(player);
+                        force_redraw_score(player, playing);
                         break;
                 }
 
@@ -538,7 +564,7 @@ EVMULT_OUT evout;
                         
                     case WM_REDRAW:
                         update_field(player);
-                        do_redraw(player);
+                        do_redraw(player, playing);
                         break;
 
                     case MN_SELECTED:
@@ -550,10 +576,10 @@ EVMULT_OUT evout;
                                 break;
                             case MNEW:
                                 player->score = 0;
-                                force_redraw_score(player);
+                                playing = 1;
+                                force_redraw_score(player, playing);
                                 update_field(player);
                                 draw_field(app_vh, &field);
-                                playing = 1;
                                 break;
                             case MABOUT:
                                 hndl_about();

@@ -32,6 +32,7 @@ typedef struct {
     char dir;
     int grow;
     int score;
+    int status;
 } WPLAYER;
 
 #define WUP     0

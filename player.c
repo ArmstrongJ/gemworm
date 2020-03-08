@@ -90,6 +90,7 @@ int alive;
     while(walker != NULL) {
         if(walker->c_x == player->head->c_x && walker->c_y == player->head->c_y) {
             alive = DEAD;
+            player->status = DEAD;
             break;
         }
         walker = (WUNIT *)walker->next;
@@ -134,6 +135,8 @@ void reset_player(WPLAYER *player)
     player->length = STARTLENGTH;
     player->dir = WLEFT;
     player->head = reset_body(player->head);
+    player->status = ALIVE;
+    player->score = 0;
 }
 
 WPLAYER *init_player()
@@ -145,5 +148,6 @@ WPLAYER *player;
     reset_player(player);
     player->grow = 0;
     player->score = 0;
+    player->status = ALIVE;
     return player;
 }
