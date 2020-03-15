@@ -43,6 +43,7 @@
 #include "wormst.h"
 #endif
 
+#include "util.h"
 #include "field.h"
 #include "player.h"
 
@@ -74,21 +75,6 @@ GRECT   app_wdw;            /* xywh of working area */
 OBJECT FAR *app_menu;
 OBJECT FAR *about_box;
 
-#ifndef WF_WXYWH
-#ifdef WF_WORKXYWH
-#define WF_WXYWH    WF_WORKXYWH
-#endif
-#endif
-
-#ifndef WF_CXYWH
-#ifdef WF_CURRXYWH
-#define WF_CXYWH    WF_CURRXYWH
-#endif
-#endif
-
-#define max(x,y)    x>y ? x : y
-#define min(x,y)    x<y ? x : y
-
 #ifdef PCGEM
 #define RCS_FILE    "wormpc.rsc"
 #else
@@ -99,23 +85,6 @@ OBJECT FAR *about_box;
 
 #define STARTWIDTH  640
 #define STARTHEIGHT 480
-
-#ifndef MGEMLIB
-int rc_intersect(const GRECT *one, GRECT *two)
-{
-WORD tx,ty,tw,th;
-
-    tw = min(one->g_x+one->g_w,two->g_x+two->g_w);
-    th = min(one->g_y+one->g_h,two->g_y+two->g_h);
-    tx = max(one->g_x,two->g_x);
-    ty = max(one->g_y,two->g_y);
-    two->g_x = tx;
-    two->g_y = ty;
-    two->g_w = tw-tx;
-    two->g_h = th-ty;
-    return ( (tw > tx) && (th > ty) );
-}
-#endif
 
 void hndl_about()
 {
@@ -276,7 +245,7 @@ int sh;
 #define PRINTRC(n,r)  printf("%s -> x=%d y=%d w=%d h=%d\n", n, r.g_x, r.g_y, r.g_w, r.g_h)
 
 /* Not necessary yet... */
-void do_redraw(WPLAYER *player, int playing)
+void do_redraw(WPLAYER *player, int playing, GRECT *dirty)
 {
 GRECT box, me, field, score, rc;
 int updated_score;
@@ -310,37 +279,43 @@ WORD pts[4];
         PRINTRC("field", field);
 #endif
 
-        memcpy(&rc, &field, sizeof(GRECT));
-        if(rc_intersect(&box, &rc)) {
-#ifdef DEBUG
-            printf("Field draw\n");
-#endif
-            pts[0] = box.g_x;
-            pts[1] = box.g_y;
-            pts[2] = box.g_w+box.g_x-1;
-            pts[3] = box.g_h+box.g_y-1;
-            vs_clip(app_vh, 1, pts);
-            draw_field(app_vh, &field);
-        }
+        /* See if this rect intersects the reported dirty */
+        if(dirty == NULL || rc_intersect(dirty, &box)) {
 
+            memcpy(&rc, &field, sizeof(GRECT));
+            if(rc_intersect(&box, &rc)) {
+#ifdef DEBUG
+                printf("Field draw\n");
+#endif
+                pts[0] = box.g_x;
+                pts[1] = box.g_y;
+                pts[2] = box.g_w+box.g_x-1;
+                pts[3] = box.g_h+box.g_y-1;
+                vs_clip(app_vh, 1, pts);
+                draw_field(app_vh, &field, &rc);
+            }
+    
 #ifdef DEBUG        
-        PRINTRC("box", box);
-        PRINTRC("score", score);
+            PRINTRC("box", box);
+            PRINTRC("score", score);
 #endif
-
-        memcpy(&rc, &score, sizeof(GRECT));
-        if(rc_intersect(&box, &rc)) {
+    
+            memcpy(&rc, &score, sizeof(GRECT));
+            if(rc_intersect(&box, &rc)) {
 #ifdef DEBUG
-            printf("Score draw\n");
+                printf("Score draw\n");
 #endif
-            pts[0] = box.g_x;
-            pts[1] = box.g_y;
-            pts[2] = box.g_w+box.g_x-1;
-            pts[3] = box.g_h+box.g_y-1;
-            vs_clip(app_vh, 1, pts);
-            do_redraw_score(player, &score, playing);
-            /* updated_score = 1; */
+                pts[0] = box.g_x;
+                pts[1] = box.g_y;
+                pts[2] = box.g_w+box.g_x-1;
+                pts[3] = box.g_h+box.g_y-1;
+                vs_clip(app_vh, 1, pts);
+                do_redraw_score(player, &score, playing);
+                /* updated_score = 1; */
+            }
+
         }
+        
         wind_get(app_wh, WF_NEXTXYWH, &box.g_x,
                                      &box.g_y,
                                      &box.g_w,
@@ -560,11 +535,12 @@ EVMULT_OUT evout;
                         do_window_change((GRECT *)&msg[4]);
                         memcpy(&field, &app_wdw, sizeof(GRECT));
                         window_to_field_rect(&field);
+                        /*break;*/
                         /* Fall through */
                         
                     case WM_REDRAW:
                         update_field(player);
-                        do_redraw(player, playing);
+                        do_redraw(player, playing, (GRECT *)&msg[4]);
                         break;
 
                     case MN_SELECTED:
@@ -579,7 +555,7 @@ EVMULT_OUT evout;
                                 playing = 1;
                                 force_redraw_score(player, playing);
                                 update_field(player);
-                                draw_field(app_vh, &field);
+                                draw_field(app_vh, &field, NULL);
                                 break;
                             case MABOUT:
                                 hndl_about();

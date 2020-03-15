@@ -48,7 +48,7 @@ void field_init(void);
 /* Checks if the player died due to wall collision */
 int check_wall(WPLAYER *player);
 
-void draw_field(WORD h_vdi, GRECT *play);
+void draw_field(WORD h_vdi, GRECT *play, GRECT *dirty);
 
 int update_field(WPLAYER *player);
 

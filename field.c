@@ -32,6 +32,7 @@
 
 #endif
 
+#include "util.h"
 #include "field.h"
 #include "player.h"
 
@@ -141,6 +142,15 @@ int check_wall(WPLAYER *player)
     return field[player->head->c_x][player->head->c_y] == CELLWALL ? DEAD : ALIVE;  
 }
 
+static void getcellrect(char cx, char cy, int xoffset, int yoffset, 
+                 int cellwidth, int cellheight, GRECT *rc)
+{
+    rc->g_x = xoffset + cx*cellwidth;
+    rc->g_y = yoffset + cy*cellheight;
+    rc->g_w = cellwidth;
+    rc->g_h = cellheight;
+}
+
 void drawcell(WORD h_vdi, int type, char cx, char cy, 
               int xoffset, int yoffset, int cellwidth, int cellheight)
 {
@@ -202,11 +212,12 @@ WUNIT *walker;
              cellwidth, cellheight);
 }
 
-void draw_field(WORD h_vdi, GRECT *play)
+void draw_field(WORD h_vdi, GRECT *play, GRECT *dirty)
 {
 char i,j;
 WORD pts[4];
 int cellwidth, cellheight;
+GRECT crc;
 
 #ifdef VDEBUG
     printf("%d: %d %d %d %d\n",h_vdi,play->g_x,play->g_y,play->g_w,play->g_h);
@@ -216,8 +227,14 @@ int cellwidth, cellheight;
 
     /* Fill background */
     vsf_color(h_vdi, (WORD)WHITE);
-    pts[0] = play->g_x; pts[1] = play->g_y;
-    pts[2] = play->g_x+play->g_w; pts[3] = play->g_y+play->g_h;
+    
+    if(dirty == NULL) {
+        pts[0] = play->g_x; pts[1] = play->g_y;
+        pts[2] = play->g_x+play->g_w; pts[3] = play->g_y+play->g_h;
+    } else {
+        pts[0] = dirty->g_x; pts[1] = dirty->g_y;
+        pts[2] = dirty->g_x+dirty->g_w; pts[3] = dirty->g_y+dirty->g_h;
+    }
     v_bar(h_vdi,pts);
 
     cellwidth = max(1,play->g_w/CELLW);
@@ -226,10 +243,26 @@ int cellwidth, cellheight;
     /* Draw all cells */
     for(i=0;i<CELLW;i++) {
         for(j=0;j<CELLH;j++) {
-            if(field[i][j] != CELLBLANK)
-                drawcell(h_vdi, field[i][j], i, j, 
-                         play->g_x, play->g_y,
-                         cellwidth, cellheight);
+            if(field[i][j] != CELLBLANK) {
+                if(dirty == NULL)
+                    drawcell(h_vdi, field[i][j], i, j, 
+                             play->g_x, play->g_y,
+                             cellwidth, cellheight);
+                else {
+                    getcellrect(i, j, 
+                                play->g_x, play->g_y,
+                                cellwidth, cellheight,
+                                &crc);
+                                
+                    /* Only draw if inside the dirty */
+                    if(rc_intersect(dirty, &crc)) {
+                        drawcell(h_vdi, field[i][j], i, j, 
+                                 play->g_x, play->g_y,
+                                 cellwidth, cellheight);
+
+                    }
+                }
+            }
         }
     }
 
