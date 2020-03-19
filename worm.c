@@ -1,5 +1,5 @@
 /* GEM Worm
- * Copyright (C) 2009 Jeffrey Armstrong
+ * Copyright (C) 2009, 2020 Jeffrey Armstrong
  * http://jeff.rainbow-100.com
  *
  * This program is free software: you can redistribute it and/or modify

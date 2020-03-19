@@ -1,9 +1,9 @@
-							
+
                              * GEM Worm! *
 
 
-Written as a demonstration for Retrochallenge 2009
-Copyright 2009 Jeffrey Armstrong
+Written originally as a demonstration for Retrochallenge 2009
+Copyright 2009, 2020 Jeffrey Armstrong
 Licensed under the GNU General Public License version 3
 
 Introduction
@@ -28,6 +28,9 @@ a = left  s = down  d = right
 
 The arrangement is very close to modern first person shooters.
 
+Every time your worm eats, you receive 100 points.  Every time you fail
+to eat available food, your score drops 10 points.
+
 Compiling
 =========
 
@@ -36,14 +39,19 @@ for either the PC or Atari.
 
     - PC -
 	
-    The program has been designed to compile using Turbo C 2 from
+	The program has been designed to compile using Turbo C 2 from
 	Borland.  To compile with GEM bindings, you'll need to install
-    the GEM Programmer's Toolkit first.  A makefile is included to
-    build the game.
-	    - Atari -
+	the GEM Programmer's Toolkit first.  A makefile is included to
+	build the game.
+	
+    - Atari -
 	
 	The program is also designed to compile with Pure C from Pure
-	Software.  The appropriate project file (worm.prj) is included.
+	Software or AHCC from whoever is maintaining that nowadays.  The
+	appropriate project file (worm.prj) is included.
+  
+	Recently, a GNU makefile (makefile.gnu) was added for use with
+	GCC on an actual Atari. 
 
 Legalese
 ========
@@ -52,7 +60,7 @@ Although this game is shockingly simple, it is still copyrighted.  The
 following applies:
 
 GEM Worm
-Copyright (C) 2009 Jeffrey Armstrong
+Copyright (C) 2009, 2020 Jeffrey Armstrong
 http://jeff.rainbow-100.com
 
 This program is free software: you can redistribute it and/or modify
