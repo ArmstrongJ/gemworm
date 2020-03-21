@@ -174,8 +174,10 @@ WORD txtwidth,txtheight;
 
     rsrc_gaddr(R_TREE,ABOUT,&about_box);
 
-    /* Make the application name nicer */
+    /* Make the application name nicer on Atari GEM */
+#ifndef PCGEM	
     menu_register(app_accid, "Worm!");
+#endif
 
     return open_window(1);
 }
