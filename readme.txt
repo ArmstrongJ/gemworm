@@ -38,20 +38,22 @@ If you have downloaded the source code, the game can be easily compiled
 for either the PC or Atari.  
 
     - PC -
-	
-	The program has been designed to compile using Turbo C 2 from
-	Borland.  To compile with GEM bindings, you'll need to install
-	the GEM Programmer's Toolkit first.  A makefile is included to
-	build the game.
-	
+    
+    The program has been designed to compile using Turbo C 2 from
+    Borland.  To compile with GEM bindings, you'll need to install
+    the GEM Programmer's Toolkit first.  A makefile is included to
+    build the game.
+    
     - Atari -
-	
-	The program is also designed to compile with Pure C from Pure
-	Software or AHCC from whoever is maintaining that nowadays.  The
-	appropriate project file (worm.prj) is included.
+    
+    The program is also designed to compile with AHCC from whoever 
+    is maintaining that nowadays.  The project used to be built with
+    Pure C, but the project file is now strictly AHCC (you could
+    make a Pure C project file, though). The appropriate AHCC 
+    project file (worm.prj) is included.
   
-	Recently, a GNU makefile (makefile.gnu) was added for use with
-	GCC on an actual Atari. 
+    Recently, a GNU makefile (makefile.gnu) was added for use with
+    GCC on an actual Atari. 
 
 Legalese
 ========

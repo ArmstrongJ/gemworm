@@ -4,13 +4,14 @@ worm.prg
 .S [] ; -Y]
 .L [-S=16384]
 =
-PCSTART.O
+AHCSTART.O
 ;
 field.c (field.h, player.h)
 player.c (field.h, player.h)
-worm.c (field.h, player.h, wormst.h)
+scores.c (scores.h)
+worm.c (field.h, player.h, scores.h, wormst.h)
 ;
-PCSTDLIB.LIB
-PCTOSLIB.LIB
-PCGEMLIB.LIB
+AHCCSTD.LIB
+AHCCTOS.LIB
+AHCCGEM.LIB
 

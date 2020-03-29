@@ -3,6 +3,8 @@
 
 /* Mostly compatability stuff */
 
+#include <string.h>
+
 #ifdef __GNUC__
 
 #include <gem.h>
@@ -19,15 +21,11 @@
 #endif /* __GNUC__ */
 
 #ifndef WF_WXYWH
-#ifdef WF_WORKXYWH
 #define WF_WXYWH    WF_WORKXYWH
-#endif
 #endif
 
 #ifndef WF_CXYWH
-#ifdef WF_CURRXYWH
 #define WF_CXYWH    WF_CURRXYWH
-#endif
 #endif
 
 #define max(x,y)    x>y ? x : y
@@ -50,5 +48,13 @@ WORD tx,ty,tw,th;
 }
 #endif
 
+static void set_resource_string(OBJECT *tree, short obj, const char *string)
+{
+long addr;
+
+    /* What a freakin' nightmare... */
+    addr = tree[obj].ob_spec.index;
+    strcpy((char *)addr, string);
+}
 
 #endif /* UTIL_WORM_HEADERS */

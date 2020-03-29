@@ -19,7 +19,9 @@
  */
 
 #include <stdio.h>
-/*#include <stdlib.h>*/
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #ifdef __GNUC__
 
@@ -74,6 +76,7 @@ GRECT   app_wdw;            /* xywh of working area */
 
 OBJECT FAR *app_menu;
 OBJECT FAR *about_box;
+OBJECT FAR *scores_box;
 
 #ifdef PCGEM
 #define RCS_FILE    "wormpc.rsc"
@@ -98,6 +101,29 @@ GRECT box,origin;
     form_dial(FMD_FINISH,0,0,0,0,box.g_x, box.g_y, box.g_w, box.g_h);
 
     return;
+}
+
+short score_positions[] = {THI1, THI2, THI3, THI4, THI5, THI6, THI7, THI8, THI9, THI10};
+
+void hndl_scores()
+{
+GRECT box,origin;
+int i;
+
+    /* ob_xywh(app_menu, MDESK, &origin); */
+
+    form_center(scores_box, &box.g_x, &box.g_y, &box.g_w, &box.g_h);
+    objc_draw(scores_box,0,2,box.g_x, box.g_y, box.g_w, box.g_h);
+    
+    for(i=0;i<10;i++) {
+        set_resource_string(scores_box, score_positions[i], "Jeff");
+    }
+    
+    form_do(scores_box,0);
+    form_dial(FMD_FINISH,0,0,0,0,box.g_x, box.g_y, box.g_w, box.g_h);
+
+    return;
+
 }
 
 int open_window(int new)
@@ -173,6 +199,7 @@ WORD txtwidth,txtheight;
     wind_update(END_UPDATE);
 
     rsrc_gaddr(R_TREE,ABOUT,&about_box);
+    rsrc_gaddr(R_TREE,HISCORES,&scores_box);
 
     /* Make the application name nicer on Atari GEM */
 #ifndef PCGEM	
@@ -423,6 +450,8 @@ EVMULT_OUT evout;
         /* Set up the "field" rectangle */
         memcpy(&field, &app_wdw, sizeof(GRECT));
         window_to_field_rect(&field);
+        
+        menu_ienable(app_menu, MPAUSE, 0);
 
         msg[0] = AC_OPEN;
         msg[4] = app_accid;
@@ -458,6 +487,8 @@ EVMULT_OUT evout;
                 hndl_keys(key, player, &playing);
                 if(last_playing != playing) {
                     force_redraw_score(player, playing);
+                    menu_text(app_menu, MPAUSE, playing == 1 ? "  Pause Game" :"  Resume Game");
+                    menu_ienable(app_menu, MPAUSE, 1);
                 }                
             } 
 
@@ -490,6 +521,7 @@ EVMULT_OUT evout;
                     form_alert(1,"[3][You've Died!|Good try, though...][Reset]");
                     reset_player(player);
                     playing = 0;
+                    menu_ienable(app_menu, MPAUSE, 0);
                 }
             } 
 
@@ -558,6 +590,20 @@ EVMULT_OUT evout;
                                 force_redraw_score(player, playing);
                                 update_field(player);
                                 draw_field(app_vh, &field, NULL);
+                                menu_ienable(app_menu, MPAUSE, 1);
+                                break;
+                            case MPAUSE:
+                                if(playing == 1) {
+                                    playing = 0;
+                                    menu_text(app_menu, MPAUSE, "  Resume Game");
+                                } else {
+                                    playing = 1;
+                                    menu_text(app_menu, MPAUSE, "  Pause Game");
+                                }
+                                force_redraw_score(player, playing);
+                                break;
+                            case MSCORES:
+                                hndl_scores();
                                 break;
                             case MABOUT:
                                 hndl_about();
