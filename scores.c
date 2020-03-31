@@ -28,7 +28,7 @@
 #define SCOREFILE   "worm.hi"
 
 struct score {
-    char initials[3];
+    char initials[4];
     int score;
 };
 
@@ -93,11 +93,12 @@ char scorebuf[8];
             fgets(scorebuf, 8, fp);
             scores[i].score = atoi(scorebuf);
         }
+        scores[i].initials[3] = '\0';
         fclose(fp);
     } else {
         for(i=0;i<10;i++) {
-            memcpy(scores[i].initials, defaults[9-i], 3);
-            scores[i].score = i == 0 ? 10 : (i * 100 + 100);
+            memcpy(scores[i].initials, defaults[i], 4);
+            scores[9-i].score = i == 0 ? 10 : (i * 500 + 100);
         }
     }
     free(filename);
@@ -120,4 +121,8 @@ int i;
     free(filename);
 }
 
-
+char *get_score_at(int pos, int *score)
+{
+    *score = scores[pos].score;
+    return scores[pos].initials;
+}

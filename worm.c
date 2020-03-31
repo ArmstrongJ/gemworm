@@ -48,6 +48,7 @@
 #include "util.h"
 #include "field.h"
 #include "player.h"
+#include "scores.h"
 
 /* Sometimes you may need to compile in some missing global
  * arrays used within the gem libraries
@@ -109,6 +110,10 @@ void hndl_scores()
 {
 GRECT box,origin;
 int i;
+const char *initials;
+int score;
+static char entry[10][18];
+char numtext[10];
 
     /* ob_xywh(app_menu, MDESK, &origin); */
 
@@ -116,7 +121,16 @@ int i;
     objc_draw(scores_box,0,2,box.g_x, box.g_y, box.g_w, box.g_h);
     
     for(i=0;i<10;i++) {
-        set_resource_string(scores_box, score_positions[i], "Jeff");
+        initials = get_score_at(i, &score);
+        strcpy(entry[i], initials);
+        
+        /* Unsafe, but what the hell...  AHCC doesn't have snprintf */
+        sprintf(numtext, "%d", score);
+
+        while(strlen(entry[i]) < 17 - strlen(numtext)) strcat(entry[i], ".");
+        strcat(entry[i], numtext);
+        
+        set_resource_string(scores_box, score_positions[i], entry[i]);
     }
     
     form_do(scores_box,0);
@@ -436,6 +450,9 @@ EVMULT_OUT evout;
         player = init_player();
         field_init();
         food_init();
+        
+        /* High scores */
+        load_scores(argv[0]);
 
 #ifdef DEBUG
         printf("Game init complete\n");
