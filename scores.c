@@ -126,3 +126,25 @@ char *get_score_at(int pos, int *score)
     *score = scores[pos].score;
     return scores[pos].initials;
 }
+
+int is_high_score(int score)
+{
+    return (score > scores[9].score);
+}
+
+void add_high_score(const char *initials, int score)
+{
+int i,j;
+
+    for(i=0;i<10;i++) {
+        if(score > scores[i].score) {
+            for(j=8;j>=i;j--) {
+                scores[j+1].score = scores[j].score;
+                memcpy(scores[j+1].initials, scores[j].initials, 3);
+            }
+            scores[i].score = score;
+            memcpy(scores[i].initials, initials, 3);
+            break;
+        }
+    }
+}

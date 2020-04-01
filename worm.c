@@ -78,6 +78,7 @@ GRECT   app_wdw;            /* xywh of working area */
 OBJECT FAR *app_menu;
 OBJECT FAR *about_box;
 OBJECT FAR *scores_box;
+OBJECT FAR *newscore_box;
 
 #ifdef PCGEM
 #define RCS_FILE    "wormpc.rsc"
@@ -101,6 +102,28 @@ GRECT box,origin;
     form_do(about_box,0);
     form_dial(FMD_FINISH,0,0,0,0,box.g_x, box.g_y, box.g_w, box.g_h);
 
+    return;
+}
+
+void hndl_high_score(int score) 
+{
+int res;
+GRECT box,origin;
+
+TEDINFO *eted;
+
+    form_center(newscore_box, &box.g_x, &box.g_y, &box.g_w, &box.g_h);
+    objc_draw(newscore_box,0,2,box.g_x, box.g_y, box.g_w, box.g_h);
+    res = form_do(newscore_box,0);
+    
+    if(res == BOK) {
+        /* save! */
+        eted = (TEDINFO *)(newscore_box[TINITIALS].ob_spec.index);
+
+        add_high_score((char *)eted->te_ptext, score);
+    }
+    
+    form_dial(FMD_FINISH,0,0,0,0,box.g_x, box.g_y, box.g_w, box.g_h);
     return;
 }
 
@@ -214,6 +237,7 @@ WORD txtwidth,txtheight;
 
     rsrc_gaddr(R_TREE,ABOUT,&about_box);
     rsrc_gaddr(R_TREE,HISCORES,&scores_box);
+    rsrc_gaddr(R_TREE,NEWSCORE,&newscore_box);
 
     /* Make the application name nicer on Atari GEM */
 #ifndef PCGEM	
@@ -535,7 +559,11 @@ EVMULT_OUT evout;
                 wind_update(END_UPDATE);
 
                 if(palive == DEAD || falive == DEAD) {
-                    form_alert(1,"[3][You've Died!|Good try, though...][Reset]");
+                    if(is_high_score(player->score)) { 
+                        hndl_high_score(player->score);
+                        save_scores(argv[0]);
+                    } else
+                        form_alert(1,"[3][You've Died!|Good try, though...][Reset]");
                     reset_player(player);
                     playing = 0;
                     menu_ienable(app_menu, MPAUSE, 0);
