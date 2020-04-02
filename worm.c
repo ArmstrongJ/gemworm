@@ -564,9 +564,12 @@ EVMULT_OUT evout;
                         save_scores(argv[0]);
                     } else
                         form_alert(1,"[3][You've Died!|Good try, though...][Reset]");
+                    
                     reset_player(player);
                     playing = 0;
                     menu_ienable(app_menu, MPAUSE, 0);
+                    update_field(player);
+                    do_redraw(player, playing, NULL);
                 }
             } 
 

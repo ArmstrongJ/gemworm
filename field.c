@@ -48,7 +48,7 @@
 char field[CELLW][CELLH];
 
 #define CELLBLANK       0
-#define CELLPLAYER  1
+#define CELLPLAYER      1
 #define CELLWALL        2
 #define CELLFOOD        3
 
@@ -65,8 +65,17 @@ void empty_field(char celltype)
 {
 char i,j;
 
-    for(i=0;i<CELLW-1;i++) {
-        for(j=0;j<CELLH-1;j++) {
+    for(i=0;i<CELLW;i++) {
+        field[i][0] = CELLWALL;
+        field[i][CELLH-1] = CELLWALL;
+    }
+    for(j=0;j<CELLH;j++) {
+        field[0][j] = CELLWALL;
+        field[CELLW-1][j] = CELLWALL;
+    }
+
+    for(i=1;i<CELLW-1;i++) {
+        for(j=1;j<CELLH-1;j++) {
             if(field[i][j] == celltype) 
                 field[i][j] = CELLBLANK;
         }
