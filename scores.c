@@ -82,16 +82,16 @@ void load_scores(const char *fullpath)
 char *filename;
 FILE *fp;
 int i;
-char scorebuf[8];
+char linebuf[16];
 
     filename = get_hi_score_filepath(fullpath);
     fp = fopen(filename, "r");
     if(fp != NULL) {
         for(i=0;i<10;i++) {
-            memset(scorebuf, 0, 8);
-            fread(scores[i].initials, 1, 3, fp);
-            fgets(scorebuf, 8, fp);
-            scores[i].score = atoi(scorebuf);
+            fgets(linebuf, 16, fp);
+            memcpy(scores[i].initials, linebuf, 3);
+            scores[i].initials[3] = '\0';
+            scores[i].score = atoi(&linebuf[3]);
         }
         scores[i].initials[3] = '\0';
         fclose(fp);
