@@ -39,31 +39,12 @@
 #endif /* __GNUC__ */
 
 /* The proper resource header is dependent upon system */
-#ifdef PCGEM
-#include "wormpc.h"
-#else
 #include "wormst.h"
-#endif
 
 #include "util.h"
 #include "field.h"
 #include "player.h"
 #include "scores.h"
-
-/* Sometimes you may need to compile in some missing global
- * arrays used within the gem libraries
- */
-#ifdef PCGEM
-#ifdef NEEDGSX
-GLOBAL WORD   contrl[11];        /* control inputs                            */
-GLOBAL WORD   intin[80];         /* max string length                         */
-GLOBAL WORD   ptsin[256];        /* polygon fill points                       */
-GLOBAL WORD   intout[45];        /* open workstation output                   */
-GLOBAL WORD   ptsout[12];
-#endif
-#else
-#define FAR
-#endif
 
 WORD    app_wflags = NAME | CLOSER | MOVER | SIZER;
 WORD    app_accid;
@@ -75,16 +56,12 @@ WORD    app_vh;         /* VDI handle */
 char    *app_title = "Worm";
 GRECT   app_wdw;            /* xywh of working area */
 
-OBJECT FAR *app_menu;
-OBJECT FAR *about_box;
-OBJECT FAR *scores_box;
-OBJECT FAR *newscore_box;
+OBJECT *app_menu;
+OBJECT *about_box;
+OBJECT *scores_box;
+OBJECT *newscore_box;
 
-#ifdef PCGEM
-#define RCS_FILE    "wormpc.rsc"
-#else
 #define RCS_FILE    "wormst.rsc"
-#endif
 
 #define MOVEDELAY   300
 
@@ -118,12 +95,7 @@ TEDINFO *eted;
     
     if(res == BOK) {
         /* save! */
-#ifdef PCGEM
-        eted = (TEDINFO *)(newscore_box[TINITIALS].ob_spec);
-#else        
         eted = (TEDINFO *)(newscore_box[TINITIALS].ob_spec.index);
-#endif
-
         add_high_score((char *)eted->te_ptext, score);
     }
     
@@ -176,15 +148,10 @@ int open_window(int new)
     if(app_wh<=0)
         return -1;
 
-#ifdef PCGEM
-    wind_set(app_wh, WF_NAME, FPOFF(app_title), FPSEG(app_title), 0, 0);
-#else
-
 #ifdef MGEMLIB
     wind_set(app_wh, WF_NAME, HIWORD(app_title), LOWORD(app_title), 0, 0);
 #else
     wind_set(app_wh, WF_NAME, app_title);
-#endif
 #endif
 
     if(new == 1) {
@@ -244,9 +211,7 @@ WORD txtwidth,txtheight;
     rsrc_gaddr(R_TREE,NEWSCORE,&newscore_box);
 
     /* Make the application name nicer on Atari GEM */
-#ifndef PCGEM	
     menu_register(app_accid, "Worm!");
-#endif
 
     return open_window(1);
 }

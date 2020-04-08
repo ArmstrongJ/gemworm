@@ -19,12 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef PCGEM
-#include "wormpc.h"
-#else
-#include "wormst.h"
-#endif
-
 #define SCOREFILE   "worm.hi"
 
 struct score {

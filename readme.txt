@@ -14,8 +14,8 @@ the worm eats more, he continues to grow.  You mustn't bump into yourself
 or the walls, though, or your worm will die!  Simple!
 
 The program is written as a GEM programming demonstration, and probably
-contains numerous bugs, coding issues, etc.  It has been designed to 
-compile on either the PC or Atari.  
+contains numerous bugs, coding issues, etc.  While originally designed to 
+compile on either the PC or Atari, the game now only works on the Atari.
 
 Game Play
 =========
@@ -35,18 +35,9 @@ Compiling
 =========
 
 If you have downloaded the source code, the game can be easily compiled
-for either the PC or Atari.  
+for the Atari.  
 
-    - PC -
-    
-    The program has been designed to compile using Turbo C 2 from
-    Borland.  To compile with GEM bindings, you'll need to install
-    the GEM Programmer's Toolkit first.  A makefile is included to
-    build the game.
-    
-    - Atari -
-    
-    The program is also designed to compile with AHCC from whoever 
+    The program is designed to compile with AHCC from whoever 
     is maintaining that nowadays.  The project used to be built with
     Pure C, but the project file is now strictly AHCC (you could
     make a Pure C project file, though). The appropriate AHCC 
