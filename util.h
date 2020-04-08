@@ -53,7 +53,12 @@ static void set_resource_string(OBJECT *tree, short obj, const char *string)
 long addr;
 
     /* What a freakin' nightmare... */
+#ifdef PCGEM
+    addr = tree[obj].ob_spec;
+#else
     addr = tree[obj].ob_spec.index;
+#endif
+
     strcpy((char *)addr, string);
 }
 

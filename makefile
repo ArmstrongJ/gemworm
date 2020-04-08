@@ -2,7 +2,7 @@
 # Turbo C for this to work
 
 CC=tcc
-CFLAGS=-ms -DPCGEM -DNEEDGSX 
+CFLAGS=-ms -DPCGEM -DNEEDGSX -Id:\dos\tmp\newkit2\inc
 CLIBS=stcgem.lib 
 TARGET=worm.app
 
@@ -16,6 +16,9 @@ player.obj: player.c player.h field.h
 field.obj: field.c player.h field.h util.h
 	$(CC) $(CFLAGS) -c field.c
 
-all: worm.c player.h field.h wormpc.h util.h player.obj field.obj
-	$(CC) $(CFLAGS) -e$(TARGET) worm.c player.obj field.obj $(CLIBS)
+scores.obj: scores.c scores.h
+	$(CC) $(CFLAGS) -c scores.c
+	
+all: worm.c player.h field.h wormpc.h util.h scores.h player.obj field.obj scores.obj
+	$(CC) $(CFLAGS) -e$(TARGET) worm.c player.obj field.obj scores.obj $(CLIBS)
 	

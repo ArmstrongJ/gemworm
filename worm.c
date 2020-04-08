@@ -118,7 +118,11 @@ TEDINFO *eted;
     
     if(res == BOK) {
         /* save! */
+#ifdef PCGEM
+        eted = (TEDINFO *)(newscore_box[TINITIALS].ob_spec);
+#else        
         eted = (TEDINFO *)(newscore_box[TINITIALS].ob_spec.index);
+#endif
 
         add_high_score((char *)eted->te_ptext, score);
     }
@@ -653,9 +657,11 @@ EVMULT_OUT evout;
                             case MSCORES:
                                 hndl_scores();
                                 break;
+#ifdef MABOUT                                
                             case MABOUT:
                                 hndl_about();
                                 break;
+#endif
                         }
                         menu_tnormal(app_menu, msg[3], 1);
                         break;
