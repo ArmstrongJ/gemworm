@@ -1,4 +1,4 @@
-CC=/usr/local/bin/gcc
+CC=gcc
 CFLAGS=-DSTGEM -DDEBUG
 CLIBS=-lgem
 TARGET=worm.app
