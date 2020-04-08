@@ -4,8 +4,8 @@ CLIBS=-lgem
 TARGET=worm.app
 
 clean:
-	rm -f *.o
-	rm -f *.app
+	rm -f player.o field.o scores.o worm.o
+	rm -f $(TARGET)
 
 player.o: player.c player.h field.h
 	$(CC) $(CFLAGS) -c player.c

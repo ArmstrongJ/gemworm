@@ -68,6 +68,12 @@ OBJECT *newscore_box;
 #define STARTWIDTH  640
 #define STARTHEIGHT 480
 
+#ifdef __GEMLIB__
+#define WHITE   G_WHITE
+#define BLACK   G_BLACK
+#endif
+
+
 void hndl_about()
 {
 GRECT box,origin;
