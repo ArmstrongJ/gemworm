@@ -36,6 +36,6 @@ jobs:
       - name: Upload Worm Zip
         uses: actions/upload-artifact@v1
         with:
-          name: worm.zip
+          name: Worm
           path: worm.zip
           
