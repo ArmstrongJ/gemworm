@@ -29,13 +29,3 @@ jobs:
       
       - name: Build Worm
         run: make -f makefile.gnu CC=m68k-atari-mint-gcc clean all 
-        
-      - name: Build Worm Zip
-        run: zip -9 worm.zip worm.app wormst.rsc license.txt readme.txt
-
-      - name: Upload Worm Zip
-        uses: actions/upload-artifact@v1
-        with:
-          name: Worm
-          path: worm.zip
-          
