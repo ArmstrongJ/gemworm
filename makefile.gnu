@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-DSTGEM -DDEBUG
+CFLAGS=-DSTGEM
 CLIBS=-lgem
 TARGET=worm.app
 
