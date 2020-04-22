@@ -46,6 +46,10 @@
 #include "player.h"
 #include "scores.h"
 
+#ifndef BORDER
+#define BORDER 0x8000
+#endif
+
 WORD    app_wflags = NAME | CLOSER | MOVER | SIZER;
 WORD    app_accid;
 WORD    app_appid;

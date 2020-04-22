@@ -276,6 +276,31 @@ GRECT crc;
         }
     }
 
+    /* Rounding can cause some blank space, so... */
+    crc.g_x = cellwidth*CELLW;
+    crc.g_y = play->g_y;
+    crc.g_w = play->g_w - crc.g_x;
+    crc.g_h = play->g_h;
+    crc.g_x += play->g_x;
+    if(crc.g_w > 0 && (dirty == NULL || rc_intersect(dirty, &crc))) {
+        vsf_color(h_vdi, (WORD)RED);
+        pts[0] = crc.g_x; pts[1] = crc.g_y;
+        pts[2] = crc.g_x+crc.g_w; pts[3] = crc.g_y+crc.g_h;
+        v_bar(h_vdi,pts);
+    }
+    
+    crc.g_x = play->g_x;
+    crc.g_y = cellheight*CELLH;
+    crc.g_w = play->g_w;
+    crc.g_h = play->g_h - crc.g_y;
+    crc.g_y += play->g_y;
+    if(crc.g_h > 0 && (dirty == NULL || rc_intersect(dirty, &crc))) {
+        vsf_color(h_vdi, (WORD)RED);
+        pts[0] = crc.g_x; pts[1] = crc.g_y;
+        pts[2] = crc.g_x+crc.g_w; pts[3] = crc.g_y+crc.g_h;
+        v_bar(h_vdi,pts);
+    } 
+
     /* Done! */
 
 }
